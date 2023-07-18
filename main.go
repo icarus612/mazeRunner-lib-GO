@@ -6,5 +6,6 @@ import (
 
 func main() {
 
-	maze := modules.Maze.init()
+	maze := modules.Maze()
+
 }
