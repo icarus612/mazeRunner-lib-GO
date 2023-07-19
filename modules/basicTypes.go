@@ -1,13 +1,11 @@
 package modules
 
-type point interface {
-	[3]int | [2]int
-}
+type point [2]int
 
-type floor [...][...]node
-type dungon [...]floor
+type floor [][]node
+type dungon []floor
 type layout interface {
-	*floor | *dungon
+	floor | dungon
 }
 type path map[point]bool
 
@@ -15,14 +13,14 @@ func (p path) add(s point) {
 	p[s] = true
 }
 
-func (p path) update[P point](s []P) {
+func (p path) update(s []point) {
 	for _, x := range s {
 		p[x] = true
 	}
 }
 
 func (p path) setShortestPath(comp path) {
-	if len(p) < len(comp) {
-		p.path = comp
+	if len(p) > len(comp) {
+		p = comp
 	}
 }
