@@ -2,6 +2,7 @@ package modules
 
 import (
 	"fmt"
+
 	"golang.org/x/exp/slices"
 )
 
@@ -31,12 +32,21 @@ func (r *runner) getOpenNodes() {
 }
 
 func (r *runner) findEndPoints() {
-	func check(nodeValue point) {
-		for _, x := range r.openNodes {
+	var (
+		m = r.maze
+		l = m.layout
+		s = m.startChar
+		e = m.endChar
+	)
 
-		}
-		if nodeValue {
-
+	for _, x := range l {
+		for _, y := range x {
+			switch y.value {
+			case s:
+				r.start = y
+			case e:
+				r.end = y
+			}
 		}
 	}
 }
@@ -75,48 +85,39 @@ func (r *runner) makeNodePaths() {
 						r.toVisit.add(i)
 					}
 				}
-			} 
+			}
 		}
-	}
-}
-
-func (r runner) viewCompleted() {
-	for _, row := range r.mappedMaze {
-		fmt.Println(row)
 	}
 }
 
 func (r *runner) buildPath() {
 	var (
-		m = r.maze
+		m     = r.maze
 		start = r.start.location
-		end = r.end.location
-		p = r.pathChar
-		s = m.startChar
-		e = m.endChar
-		w = m.wallChar
-		o = m.openChar
-		l = m.layout
-		mpd = m.mappedMaze
+		end   = r.end.location
+		p     = r.pathChar
+		s     = m.startChar
+		e     = m.endChar
+		w     = m.wallChar
+		o     = m.openChar
+		l     = m.layout
+		mpd   = m.mappedMaze
 	)
-	for slices.Contains([]rune {s, e, w, o}, p) {
+	for slices.Contains([]rune{s, e, w, o}, p) {
 		fmt.Println("The current path character can not be the same as the maze characters.")
 		fmt.Printf("Current maze characters include %s, %s, %s, and %s.", s, e, w, o)
 		fmt.Println("What would you like the new path the be?")
-		fmt.Scan(&p)	
-	} 
+		fmt.Scan(&p)
+	}
 
 	mpd = m
 	for _, x := range mpd {
 		for _, y := range x {
-
 			if start != y.location && r.path.Contains(y.location) {
 				y.value = p
 			}
 		}
 	}
-
-
 }
 
 func (r *runner) setShortestPath(p path) {
@@ -125,14 +126,22 @@ func (r *runner) setShortestPath(p path) {
 	}
 }
 
+func (r runner) ViewCompleted() {
+	for _, row := range r.mappedMaze {
+		fmt.Println(row)
+	}
+}
+
 func Runner(m maze, pathChar rune) runner {
 
-	r := runner {
+	r := runner{
 		completed: false,
-		maze: m,
-		pathChar: pathChar || x,
+		maze:      m,
+		pathChar:  pathChar || x,
 	}
 	r.getOpenNodes()
 	r.findEndPoints()
+	r.makeNodePaths()
+	r.buildPath()
 	return r
 }

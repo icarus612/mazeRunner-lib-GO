@@ -13,7 +13,7 @@ type maze struct {
 	openChar  rune
 }
 
-func (m *maze) buildNew(build [2]int, buildType rune) {
+func (m *maze) BuildNew(build [2]int, buildType rune) {
 	var (
 		openPoints path
 		s          point
@@ -60,7 +60,7 @@ func (m *maze) buildNew(build [2]int, buildType rune) {
 	l[e[0]][e[1]].value = m.endChar
 }
 
-func (m *maze) viewLayout() {
+func (m *maze) ViewLayout() {
 	for _, p := range m.layout {
 		fmt.Println(p)
 	}
@@ -78,6 +78,6 @@ func Maze(build [2]int, buildType rune) maze {
 		wallChar:  '#',
 		openChar:  ' ',
 	}
-	m.buildNew(build, buildType)
+	m.BuildNew(build, buildType)
 	return m
 }
