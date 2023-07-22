@@ -3,13 +3,17 @@ package modules
 type node struct {
 	value    rune
 	location point
-	children []node
+}
+type rNode struct {
+	node
+	path     []point
+	children []rNode
 }
 
-func (n *node) addChild(c node) {
+func (n *rNode) addChild(c rNode) {
 	n.children = append(n.children, c)
 }
 
-func (n *node) removeChild(c node) {
+func (n *rNode) removeChild(c rNode) {
 	n.children = append(n.children, c)
 }
