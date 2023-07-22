@@ -17,3 +17,13 @@ func (p path) setShortestPath(comp path) {
 		p = comp
 	}
 }
+
+func (p path) toSlice() []point {
+	var s []point
+	for k, v := range p {
+		if v {
+			s = append(s, k)
+		}
+	}
+	return s
+}
