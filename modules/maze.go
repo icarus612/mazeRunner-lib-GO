@@ -42,7 +42,6 @@ func (m *maze) BuildNew(build [2]int, buildType rune) {
 			l[x][y] = n
 		}
 	}
-	fmt.Println(buildType, 'h')
 	switch buildType {
 	case 'h':
 		s = point{1, (rand.Int() % (width - 1)) + 1}
@@ -60,7 +59,6 @@ func (m *maze) BuildNew(build [2]int, buildType rune) {
 		e = openPoints.toSlice()[rand.Int()%len(openPoints)]
 		delete(openPoints, e)
 	}
-	fmt.Println(s, e)
 	l[s[0]][s[1]].value = m.startChar
 	l[e[0]][e[1]].value = m.endChar
 }

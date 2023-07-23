@@ -136,8 +136,11 @@ func (r *runner) setShortestPath(p path) {
 }
 
 func (r runner) ViewCompleted() {
-	for _, row := range r.mappedLayout {
-		fmt.Println(row)
+	for _, x := range r.mappedLayout {
+		for _, y := range x {
+			fmt.Print(string(y.value))
+		}
+		fmt.Println()
 	}
 }
 
