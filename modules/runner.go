@@ -71,19 +71,27 @@ func (r *runner) lookAround(n rNode) {
 
 func (r *runner) makeNodePaths() {
 	var (
-		rtv = r.toVisit
+		rtv  = r.toVisit
+		vtd  = r.visited
+		vtdn = []point{}
 	)
+	for _, x := range vtd {
+		vtdn = append(vtdn, x.location)
+	}
 	rtv = append(rtv, r.start)
 	for len(rtv) > 0 {
+		current := rtv[0]
+		rtv = rtv[1:]
 
-		if !r.visited[x] {
-			r.lookAround(x)
-			r.visited.add(x)
-			for i := range x.children {
-				if i.value == r.end.value {
+		if !slices.Contains(vtdn, current.location) {
+
+			r.lookAround(current)
+			vtd = append(vtd, current)
+			for _, n := range current.children {
+				if n.value == r.end.value {
 					r.completed = true
 				} else {
-					r.toVisit.add(i)
+					rtv = append(rtv, n)
 				}
 			}
 		}
@@ -93,15 +101,16 @@ func (r *runner) makeNodePaths() {
 
 func (r *runner) buildPath() {
 	var (
-		m     = r.maze
 		start = r.start.location
 		end   = r.end.location
 		mpd   = r.mappedLayout
+		m     = r.maze
 		p     = r.pathChar
 		s     = m.startChar
 		e     = m.endChar
 		w     = m.wallChar
 		o     = m.openChar
+		l     = m.layout
 	)
 	for slices.Contains([]rune{s, e, w, o}, p) {
 		fmt.Println("The current path character can not be the same as the maze characters.")
@@ -110,10 +119,10 @@ func (r *runner) buildPath() {
 		fmt.Scan(&p)
 	}
 
-	mpd = m
+	mpd = l
 	for _, x := range mpd {
 		for _, y := range x {
-			if start != y.location && slices.Contains(r.shortestPath.toSlice(), y.location) {
+			if start != y.location && end != y.location && slices.Contains(r.shortestPath.toSlice(), y.location) {
 				y.value = p
 			}
 		}
