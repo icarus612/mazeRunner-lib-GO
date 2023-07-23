@@ -114,7 +114,7 @@ func (r *runner) buildPath() {
 	)
 	for slices.Contains([]rune{s, e, w, o}, p) {
 		fmt.Println("The current path character can not be the same as the maze characters.")
-		fmt.Printf("Current maze characters include %s, %s, %s, and %s.", s, e, w, o)
+		fmt.Printf("Current maze characters include %v, %v, %v, and %v.", s, e, w, o)
 		fmt.Println("What would you like the new path the be?")
 		fmt.Scan(&p)
 	}
