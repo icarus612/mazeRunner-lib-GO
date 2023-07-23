@@ -15,54 +15,62 @@ type maze struct {
 
 func (m *maze) BuildNew(build [2]int, buildType rune) {
 	var (
-		openPoints path
+		openPoints path = make(path)
 		s          point
 		e          point
 		height     int    = build[0]
 		width      int    = build[1]
 		l          layout = m.layout
 	)
-	for x := 0; x >= width; x++ {
-		for y := 0; y >= height; y++ {
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
 			p := point{x, y}
+			n := node{
+				location: p,
+			}
 			if p[0] == 0 || p[1] == 0 || p[0] == height-1 || p[1] == width-1 {
-				l[x][y].value = m.wallChar
+				n.value = m.wallChar
 			} else {
 				openPoints[p] = true
 				rng := rand.Int() % 3
 				if rng%2 == 1 {
-					l[x][y].value = m.openChar
+					n.value = m.wallChar
 				} else {
-					l[x][y].value = m.wallChar
+					n.value = m.openChar
 				}
 			}
+			l[x][y] = n
 		}
 	}
-
+	fmt.Println(buildType, 'h')
 	switch buildType {
 	case 'h':
-		s = point{1, rand.Int() % width}
+		s = point{1, (rand.Int() % (width - 1)) + 1}
+		e = point{height - 2, (rand.Int() % (width - 1)) + 1}
 		delete(openPoints, s)
-		e = point{height - 2, rand.Int() % height}
 		delete(openPoints, e)
 	case 'v':
-		s = point{1, rand.Int() % width}
+		s = point{(rand.Int() % (height - 1)) + 1, 1}
+		e = point{(rand.Int() % (height - 1)) + 1, width - 2}
 		delete(openPoints, s)
-		e = point{height - 2, rand.Int() % height}
 		delete(openPoints, e)
 	default:
-		s := point{rand.Int() % len(openPoints)}
+		s = openPoints.toSlice()[rand.Int()%len(openPoints)]
 		delete(openPoints, s)
-		e = point{height - 2, rand.Int() % height}
+		e = openPoints.toSlice()[rand.Int()%len(openPoints)]
 		delete(openPoints, e)
 	}
+	fmt.Println(s, e)
 	l[s[0]][s[1]].value = m.startChar
 	l[e[0]][e[1]].value = m.endChar
 }
 
 func (m *maze) ViewLayout() {
-	for _, p := range m.layout {
-		fmt.Println(p)
+	for _, x := range m.layout {
+		for _, y := range x {
+			fmt.Print(string(y.value))
+		}
+		fmt.Println()
 	}
 }
 
@@ -72,11 +80,18 @@ func Maze(build [2]int, buildType rune) maze {
 	//} else {
 	//	return maze[dungon]
 	//}
+
+	l := make(layout, build[1])
+	for i := range l {
+		l[i] = make([]node, build[0])
+	}
+
 	m := maze{
 		startChar: 's',
 		endChar:   'e',
 		wallChar:  '#',
 		openChar:  ' ',
+		layout:    l,
 	}
 	m.BuildNew(build, buildType)
 	return m

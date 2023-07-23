@@ -22,7 +22,7 @@ type runner struct {
 func (r *runner) getOpenNodes() {
 	p := r.maze.layout
 	for x := 0; x < len(p); x++ {
-		for y := 0; x < len(p[x]); y++ {
+		for y := 0; y < len(p[x]); y++ {
 			newNode := p[x][y]
 			if newNode.value != r.maze.wallChar {
 				r.openNodes = append(r.openNodes, rNode{node: newNode})
@@ -144,9 +144,10 @@ func (r runner) ViewCompleted() {
 func Runner(m maze, pathChar rune) runner {
 
 	r := runner{
-		completed: false,
-		maze:      m,
-		pathChar:  pathChar | 'x',
+		completed:    false,
+		maze:         m,
+		pathChar:     pathChar | 'x',
+		shortestPath: make(path),
 	}
 	r.getOpenNodes()
 	r.findEndPoints()
