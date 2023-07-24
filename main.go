@@ -43,7 +43,6 @@ func main() {
 	)
 
 	m.ViewLayout()
-	r.ViewCompletedPath()
 	if r.Completed {
 		r.ViewCompleted()
 	} else {

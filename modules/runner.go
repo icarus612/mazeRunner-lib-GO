@@ -78,6 +78,7 @@ func (r *runner) makeNodePaths() {
 	for len(rtv) > 0 {
 		var (
 			current = rtv[0]
+			cp      = current.path
 			cl      = current.location
 		)
 
@@ -85,14 +86,18 @@ func (r *runner) makeNodePaths() {
 		if !slices.Contains(vtd, cl) {
 			r.lookAround(&current)
 
-			newPath := current.path
+			newPath := make(path, len(cp))
+			for k, v := range cp {
+				newPath[k] = v
+			}
+
 			newPath.add(cl)
 			vtd = append(vtd, cl)
 			for _, n := range current.children {
 				n.path = newPath
 				if n.value == r.end.value {
 					r.Completed = true
-					r.setShortestPath(current.path)
+					r.setShortestPath(newPath)
 				} else {
 					rtv = append(rtv, n)
 				}
@@ -132,7 +137,6 @@ func (r *runner) buildPath() {
 
 func (r *runner) setShortestPath(p path) {
 	if len(p) < len(r.shortestPath) || len(r.shortestPath) == 0 {
-		fmt.Println(p.toSlice())
 		r.shortestPath = p
 	}
 }
