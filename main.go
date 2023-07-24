@@ -18,6 +18,7 @@ func main() {
 	var (
 		size     [2]int
 		mazeType string
+		pathType string
 		Maze     = modules.Maze
 		Runner   = modules.Runner
 	)
@@ -31,12 +32,21 @@ func main() {
 	if len(mazeType) == 0 {
 		mazeType = "r"
 	}
-
+	fmt.Print("What character should the path of the completed maze be (enter for x)? ")
+	fmt.Scanln(&pathType)
+	if len(pathType) == 0 {
+		pathType = "x"
+	}
 	var (
 		m = Maze(size, rune(mazeType[0]))
-		r = Runner(m, 'x')
+		r = Runner(m, rune(pathType[0]))
 	)
 
 	m.ViewLayout()
-	r.ViewCompleted()
+	r.ViewCompletedPath()
+	if r.Completed {
+		r.ViewCompleted()
+	} else {
+		fmt.Println("Can Not Complete!")
+	}
 }

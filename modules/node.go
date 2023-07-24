@@ -6,7 +6,7 @@ type node struct {
 }
 type rNode struct {
 	node
-	path     []point
+	path     path
 	children []rNode
 }
 
@@ -14,12 +14,14 @@ func (n *rNode) addChild(c rNode) {
 	n.children = append(n.children, c)
 }
 
-func (n *rNode) removeChild(c rNode) {
-	n.children = append(n.children, c)
+func (r *rNode) setPath(p path) {
+	r.path = p
 }
 
-func (r *rNode) setShortestPath(p []point) {
-	if len(p) < len(r.path) {
-		r.path = p
+func runNode(n node) rNode {
+	rn := rNode{
+		node: n,
+		path: make(path),
 	}
+	return rn
 }

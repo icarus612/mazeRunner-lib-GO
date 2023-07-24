@@ -7,11 +7,11 @@ import (
 )
 
 type runner struct {
-	completed    bool
+	Completed    bool
 	pathChar     rune
 	openNodes    []rNode
 	shortestPath path
-	visited      []rNode
+	visited      []point
 	toVisit      []rNode
 	start        rNode
 	end          rNode
@@ -25,7 +25,7 @@ func (r *runner) getOpenNodes() {
 		for y := 0; y < len(p[x]); y++ {
 			newNode := p[x][y]
 			if newNode.value != r.maze.wallChar {
-				r.openNodes = append(r.openNodes, rNode{node: newNode})
+				r.openNodes = append(r.openNodes, runNode(newNode))
 			}
 		}
 	}
@@ -43,15 +43,15 @@ func (r *runner) findEndPoints() {
 		for _, y := range x {
 			switch y.value {
 			case s:
-				r.start = rNode{node: y}
+				r.start = runNode(y)
 			case e:
-				r.end = rNode{node: y}
+				r.end = runNode(y)
 			}
 		}
 	}
 }
 
-func (r *runner) lookAround(n rNode) {
+func (r *runner) lookAround(n *rNode) {
 	nl := n.location
 	for _, v := range r.openNodes {
 		var (
@@ -71,25 +71,28 @@ func (r *runner) lookAround(n rNode) {
 
 func (r *runner) makeNodePaths() {
 	var (
-		rtv  = r.toVisit
-		vtd  = r.visited
-		vtdn = []point{}
+		rtv = r.toVisit
+		vtd = r.visited
 	)
-	for _, x := range vtd {
-		vtdn = append(vtdn, x.location)
-	}
 	rtv = append(rtv, r.start)
 	for len(rtv) > 0 {
-		current := rtv[0]
+		var (
+			current = rtv[0]
+			cl      = current.location
+		)
+
 		rtv = rtv[1:]
+		if !slices.Contains(vtd, cl) {
+			r.lookAround(&current)
 
-		if !slices.Contains(vtdn, current.location) {
-
-			r.lookAround(current)
-			vtd = append(vtd, current)
+			newPath := current.path
+			newPath.add(cl)
+			vtd = append(vtd, cl)
 			for _, n := range current.children {
+				n.path = newPath
 				if n.value == r.end.value {
-					r.completed = true
+					r.Completed = true
+					r.setShortestPath(current.path)
 				} else {
 					rtv = append(rtv, n)
 				}
@@ -110,7 +113,6 @@ func (r *runner) buildPath() {
 		e     = m.endChar
 		w     = m.wallChar
 		o     = m.openChar
-		l     = m.layout
 	)
 	for slices.Contains([]rune{s, e, w, o}, p) {
 		fmt.Println("The current path character can not be the same as the maze characters.")
@@ -119,20 +121,24 @@ func (r *runner) buildPath() {
 		fmt.Scan(&p)
 	}
 
-	mpd = l
-	for _, x := range mpd {
-		for _, y := range x {
+	for i, x := range mpd {
+		for j, y := range x {
 			if start != y.location && end != y.location && slices.Contains(r.shortestPath.toSlice(), y.location) {
-				y.value = p
+				mpd[i][j].value = p
 			}
 		}
 	}
 }
 
 func (r *runner) setShortestPath(p path) {
-	if len(p) < len(r.shortestPath) {
+	if len(p) < len(r.shortestPath) || len(r.shortestPath) == 0 {
+		fmt.Println(p.toSlice())
 		r.shortestPath = p
 	}
+}
+
+func (r *runner) ViewCompletedPath() {
+	fmt.Println(r.shortestPath.toSlice())
 }
 
 func (r runner) ViewCompleted() {
@@ -147,9 +153,10 @@ func (r runner) ViewCompleted() {
 func Runner(m maze, pathChar rune) runner {
 
 	r := runner{
-		completed:    false,
+		Completed:    false,
 		maze:         m,
-		pathChar:     pathChar | 'x',
+		mappedLayout: m.layout,
+		pathChar:     pathChar,
 		shortestPath: make(path),
 	}
 	r.getOpenNodes()
