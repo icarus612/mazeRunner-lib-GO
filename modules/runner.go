@@ -21,14 +21,18 @@ type runner struct {
 
 func (r *runner) getOpenNodes() {
 	p := r.maze.layout
-	for x := 0; x < len(p); x++ {
-		for y := 0; y < len(p[x]); y++ {
-			newNode := p[x][y]
-			if newNode.value != r.maze.wallChar {
-				r.openNodes = append(r.openNodes, runNode(newNode))
-			}
+	p.traverse(func(n node) {
+		var (
+			l       = n.location
+			l0      = l[0]
+			l1      = l[1]
+			newNode = p[l0][l1]
+		)
+		if newNode.value != r.maze.wallChar {
+			r.openNodes = append(r.openNodes, runNode(newNode))
 		}
-	}
+	})
+
 }
 
 func (r *runner) findEndPoints() {
@@ -126,13 +130,16 @@ func (r *runner) buildPath() {
 		fmt.Scan(&p)
 	}
 
-	for i, x := range mpd {
-		for j, y := range x {
-			if start != y.location && end != y.location && slices.Contains(r.shortestPath.toSlice(), y.location) {
-				mpd[i][j].value = p
-			}
+	mpd.traverse(func(n node) {
+		var (
+			l  = n.location
+			l0 = l[0]
+			l1 = l[1]
+		)
+		if start != l && end != l && slices.Contains(r.shortestPath.toSlice(), l) {
+			mpd[l0][l1].value = p
 		}
-	}
+	})
 }
 
 func (r *runner) setShortestPath(p path) {
@@ -146,23 +153,18 @@ func (r *runner) ViewCompletedPath() {
 }
 
 func (r runner) ViewCompleted() {
-	for _, x := range r.mappedLayout {
-		for _, y := range x {
-			fmt.Print(string(y.value))
-		}
-		fmt.Println()
-	}
+	r.mappedLayout.print()
 }
 
 func Runner(m maze, pathChar rune) runner {
-
 	r := runner{
 		Completed:    false,
 		maze:         m,
-		mappedLayout: m.layout,
+		mappedLayout: m.layout.deepCopy(),
 		pathChar:     pathChar,
 		shortestPath: make(path),
 	}
+
 	r.getOpenNodes()
 	r.findEndPoints()
 	r.makeNodePaths()

@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -9,6 +8,7 @@ type maze struct {
 	layout    layout
 	startChar rune
 	endChar   rune
+	floorChar rune
 	wallChar  rune
 	openChar  rune
 }
@@ -63,13 +63,8 @@ func (m *maze) BuildNew(build [2]int, buildType rune) {
 	l[e[0]][e[1]].value = m.endChar
 }
 
-func (m *maze) ViewLayout() {
-	for _, x := range m.layout {
-		for _, y := range x {
-			fmt.Print(string(y.value))
-		}
-		fmt.Println()
-	}
+func (m maze) ViewLayout() {
+	m.layout.print()
 }
 
 func Maze(build [2]int, buildType rune) maze {
@@ -87,6 +82,7 @@ func Maze(build [2]int, buildType rune) maze {
 	m := maze{
 		startChar: 's',
 		endChar:   'e',
+		floorChar: 'f',
 		wallChar:  '#',
 		openChar:  ' ',
 		layout:    l,
