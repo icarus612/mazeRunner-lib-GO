@@ -19,58 +19,54 @@ type runner struct {
 	mappedLayout layout
 }
 
-func (r *runner) getOpenNodes() {
-	p := r.maze.layout
-	p.traverse(func(n node) {
-		var (
-			l       = n.location
-			l0      = l[0]
-			l1      = l[1]
-			newNode = p[l0][l1]
-		)
-		if newNode.value != r.maze.wallChar {
-			r.openNodes = append(r.openNodes, runNode(newNode))
-		}
-	})
-
-}
-
-func (r *runner) findEndPoints() {
+func (r *runner) buildPathTree() {
 	var (
-		m = r.maze
-		l = m.layout
-		s = m.startChar
-		e = m.endChar
+		m      = r.maze
+		l      = m.layout
+		sc     = m.startChar
+		ec     = m.endChar
+		fc     = m.floorChar
+		wc     = m.wallChar
+		oc     = m.openChar
+		oNodes = r.openNodes
 	)
-
-	for _, x := range l {
-		for _, y := range x {
-			switch y.value {
-			case s:
-				r.start = runNode(y)
-			case e:
-				r.end = runNode(y)
+	l.traverse(
+		func(n node) {
+			if n.value == wc {
+				return
 			}
-		}
-	}
+			rn := runNode(n)
+			switch n.value {
+			case sc:
+				r.start = rn
+			case ec:
+				r.end = rn
+			case oc, fc:
+				oNodes = append(oNodes, rn)
+				fallthrough
+			case oc:
+				r.checkSpace(&rn)
+			case fc:
+				r.checkStairs(&rn)
+			}
+		},
+	)
 }
 
-func (r *runner) lookAround(n *rNode) {
-	nl := n.location
-	for _, v := range r.openNodes {
-		var (
-			vl = v.location
-		)
-		if vl[0]-1 == nl[0] && vl[1] == nl[1] {
-			n.addChild(v)
-		} else if vl[0]+1 == nl[0] && vl[1] == nl[1] {
-			n.addChild(v)
-		} else if vl[1]-1 == nl[1] && vl[0] == nl[0] {
-			n.addChild(v)
-		} else if vl[1]+1 == nl[1] && vl[0] == nl[0] {
-			n.addChild(v)
-		}
-	}
+func (r *runner) checkStairs(n *rNode) {
+	var (
+		m   = r.maze
+		l   = m.layout
+		nl  = n.location
+		nl0 = nl[0]
+		nl1 = nl[1]
+		nl2 = nl[2]
+		p1  = l[nl0][nl1][nl2]
+	)
+}
+
+func (r *runner) checkSpace(n *rNode) {
+
 }
 
 func (r *runner) makeNodePaths() {
