@@ -43,9 +43,8 @@ func (r *runner) buildPathTree() {
 				r.end = rn
 			case oc, fc:
 				oNodes = append(oNodes, rn)
-				fallthrough
-			case oc:
 				r.checkSpace(&rn)
+				fallthrough
 			case fc:
 				r.checkStairs(&rn)
 			}
@@ -61,50 +60,25 @@ func (r *runner) checkStairs(n *rNode) {
 		nl0 = nl[0]
 		nl1 = nl[1]
 		nl2 = nl[2]
-		p1  = l[nl0][nl1][nl2]
 	)
+
+	if nl0 > 0 {
+		pf := l[nl0-1][nl1][nl2]
+		if pf.value == m.floorChar {
+			n.addChild(runNode(pf))
+		}
+	}
+	if nl0 < len(l) {
+		pb := l[nl0+1][nl1][nl2]
+		if pb.value == m.floorChar {
+			n.addChild(runNode(pb))
+		}
+	}
+
 }
 
 func (r *runner) checkSpace(n *rNode) {
 
-}
-
-func (r *runner) makeNodePaths() {
-	var (
-		rtv = r.toVisit
-		vtd = r.visited
-	)
-	rtv = append(rtv, r.start)
-	for len(rtv) > 0 {
-		var (
-			current = rtv[0]
-			cp      = current.path
-			cl      = current.location
-		)
-
-		rtv = rtv[1:]
-		if !slices.Contains(vtd, cl) {
-			r.lookAround(&current)
-
-			newPath := make(path, len(cp))
-			for k, v := range cp {
-				newPath[k] = v
-			}
-
-			newPath.add(cl)
-			vtd = append(vtd, cl)
-			for _, n := range current.children {
-				n.path = newPath
-				if n.value == r.end.value {
-					r.Completed = true
-					r.setShortestPath(newPath)
-				} else {
-					rtv = append(rtv, n)
-				}
-			}
-		}
-
-	}
 }
 
 func (r *runner) buildPath() {
@@ -131,9 +105,10 @@ func (r *runner) buildPath() {
 			l  = n.location
 			l0 = l[0]
 			l1 = l[1]
+			l2 = l[2]
 		)
 		if start != l && end != l && slices.Contains(r.shortestPath.toSlice(), l) {
-			mpd[l0][l1].value = p
+			mpd[l0][l1][l2].value = p
 		}
 	})
 }
@@ -160,10 +135,6 @@ func Runner(m maze, pathChar rune) runner {
 		pathChar:     pathChar,
 		shortestPath: make(path),
 	}
-
-	r.getOpenNodes()
-	r.findEndPoints()
-	r.makeNodePaths()
 	r.buildPath()
 	return r
 }

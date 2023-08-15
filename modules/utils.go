@@ -15,24 +15,25 @@ func (l layout) traverse(f1 lFuncN, f2 ...lFunc) {
 			for _, z := range y {
 				f1(z)
 			}
+			if len(f2) > 0 {
+				f2[0]()
+			}
 		}
-		if len(f2) > 0 {
-			f2[0]()
+		if len(f2) > 1 {
+			f2[1]()
 		}
-	}
-	if len(f2) > 1 {
-		f2[1]()
 	}
 }
 
 func (l layout) print() {
+	nl := func() { fmt.Println() }
+
 	l.traverse(
 		func(y node) {
 			fmt.Print(string(y.value))
 		},
-		func() {
-			fmt.Println()
-		},
+		nl,
+		nl,
 	)
 }
 
@@ -41,8 +42,8 @@ func (l layout) deepCopy() layout {
 	for i, f := range l {
 		nl[i] = make(floor, len(f))
 		for j := range f {
-			nl[i][j] = make([]node, len(l[j]))
-			copy(nl[j], l[j])
+			nl[i][j] = make([]node, len(l[i]))
+			copy(nl[i], l[i])
 		}
 	}
 	return nl
