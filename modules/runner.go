@@ -9,7 +9,6 @@ import (
 type runner struct {
 	Completed    bool
 	pathChar     rune
-	openNodes    []rNode
 	shortestPath path
 	visited      []point
 	toVisit      []rNode
@@ -19,37 +18,41 @@ type runner struct {
 	mappedLayout layout
 }
 
-func (r *runner) buildPathTree() {
+func (r *runner) findEndpoints() {
 	var (
-		m      = r.maze
-		l      = m.layout
-		sc     = m.startChar
-		ec     = m.endChar
-		fc     = m.floorChar
-		wc     = m.wallChar
-		oc     = m.openChar
-		oNodes = r.openNodes
+		m  = r.maze
+		sc = m.startChar
+		ec = m.endChar
 	)
-	l.traverse(
+	m.layout.traverse(
 		func(n node) {
-			if n.value == wc {
-				return
-			}
 			rn := runNode(n)
 			switch n.value {
 			case sc:
 				r.start = rn
 			case ec:
 				r.end = rn
-			case oc, fc:
-				oNodes = append(oNodes, rn)
-				r.checkSpace(&rn)
-				fallthrough
-			case fc:
-				r.checkStairs(&rn)
 			}
 		},
 	)
+}
+
+func (r *runner) lookAround(n *rNode) {
+	var (
+		m  = r.maze
+		fc = m.floorChar
+		oc = m.openChar
+		sc = m.startChar
+	)
+
+	switch n.value {
+	case oc, fc, sc:
+		r.checkSpace(n)
+		fallthrough
+	case fc:
+		r.checkStairs(n)
+	}
+
 }
 
 func (r *runner) checkStairs(n *rNode) {
@@ -82,6 +85,8 @@ func (r *runner) checkSpace(n *rNode) {
 		m   = r.maze
 		oc  = m.openChar
 		fc  = m.floorChar
+		sc  = m.startChar
+		ec  = m.endChar
 		nl  = n.location
 		nl0 = nl[0]
 		nl1 = nl[1]
@@ -94,8 +99,8 @@ func (r *runner) checkSpace(n *rNode) {
 	)
 
 	for _, x := range []node{f1, f2, f3, f4} {
-		v := x.value
-		if v == oc || v == fc {
+		switch x.value {
+		case oc, fc, sc, ec:
 			n.addChild(runNode(x))
 		}
 	}
@@ -113,10 +118,10 @@ func (r *runner) makeNodePaths() {
 			cp      = current.path
 			cl      = current.location
 		)
-
 		rtv = rtv[1:]
 		if !slices.Contains(vtd, cl) {
 
+			r.lookAround(&current)
 			newPath := make(path, len(cp))
 			for k, v := range cp {
 				newPath[k] = v
@@ -192,7 +197,7 @@ func Runner(m maze, pathChar rune) runner {
 		pathChar:     pathChar,
 		shortestPath: make(path),
 	}
-	r.buildPathTree()
+	r.findEndpoints()
 	r.makeNodePaths()
 	r.buildPath()
 	return r

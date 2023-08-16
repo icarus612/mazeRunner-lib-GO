@@ -27,7 +27,6 @@ func (l layout) traverse(f1 lFuncN, f2 ...lFunc) {
 
 func (l layout) print() {
 	nl := func() { fmt.Println() }
-
 	l.traverse(
 		func(y node) {
 			fmt.Print(string(y.value))

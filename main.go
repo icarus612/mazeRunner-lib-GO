@@ -27,7 +27,7 @@ func main() {
 
 	size[0] = getSize("L: ", size[0], 10)
 	size[1] = getSize("W: ", size[1], 10)
-	size[2] = getSize("H: ", size[2], 3)
+	size[2] = getSize("H: ", size[2], 1)
 	fmt.Print("Maze type  ? ")
 	fmt.Scanln(&mazeType)
 	if len(mazeType) == 0 {
