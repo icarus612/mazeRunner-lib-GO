@@ -5,29 +5,30 @@ import (
 	"mazerunner/modules"
 )
 
-func getSize(str string, val int) int {
+func getSize(str string, val int, size int) int {
 	fmt.Print(str)
 	fmt.Scanln(&val)
 	if val <= 0 {
-		val = 10
+		val = size
 	}
 	return val
 }
 
 func main() {
 	var (
-		size     [2]int
+		size     [3]int
 		mazeType string
 		pathType string
 		Maze     = modules.Maze
 		Runner   = modules.Runner
 	)
-	fmt.Println("What is the M x N size you would like for the maze?")
-	fmt.Println("Default values are 10 x 10 (press enter)?")
+	fmt.Println("What is the L x W x H size you would like for the maze?")
+	fmt.Println("Default values are 40 x 20 x 3 (press enter)?")
 
-	size[0] = getSize("M: ", size[1])
-	size[1] = getSize("N: ", size[1])
-	fmt.Print("Maze type horizontal (h), vertical (v) or random (r) (enter for random)? ")
+	size[0] = getSize("L: ", size[0], 40)
+	size[1] = getSize("W: ", size[1], 20)
+	size[2] = getSize("H: ", size[2], 3)
+	fmt.Print("Maze type  ? ")
 	fmt.Scanln(&mazeType)
 	if len(mazeType) == 0 {
 		mazeType = "r"

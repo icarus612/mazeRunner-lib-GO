@@ -9,7 +9,6 @@ import (
 type runner struct {
 	Completed    bool
 	pathChar     rune
-	openNodes    []rNode
 	shortestPath path
 	visited      []point
 	toVisit      []rNode
@@ -19,56 +18,90 @@ type runner struct {
 	mappedLayout layout
 }
 
-func (r *runner) getOpenNodes() {
-	p := r.maze.layout
-	p.traverse(func(n node) {
-		var (
-			l       = n.location
-			l0      = l[0]
-			l1      = l[1]
-			newNode = p[l0][l1]
-		)
-		if newNode.value != r.maze.wallChar {
-			r.openNodes = append(r.openNodes, runNode(newNode))
-		}
-	})
+func (r *runner) findEndpoints() {
+	var (
+		m  = r.maze
+		sc = m.startChar
+		ec = m.endChar
+	)
+	m.layout.traverse(
+		func(n node) {
+			rn := runNode(n)
+			switch n.value {
+			case sc:
+				r.start = rn
+			case ec:
+				r.end = rn
+			}
+		},
+	)
+}
+
+func (r *runner) lookAround(n *rNode) {
+	var (
+		m  = r.maze
+		fc = m.floorChar
+		oc = m.openChar
+		sc = m.startChar
+	)
+
+	switch n.value {
+	case oc, sc, fc:
+		r.checkSpace(n)
+		fallthrough
+	case fc:
+		r.checkStairs(n)
+	}
 
 }
 
-func (r *runner) findEndPoints() {
+func (r *runner) checkStairs(n *rNode) {
 	var (
-		m = r.maze
-		l = m.layout
-		s = m.startChar
-		e = m.endChar
+		m   = r.maze
+		l   = m.layout
+		nl  = n.location
+		fc  = m.floorChar
+		nl0 = nl[0]
+		nl1 = nl[1]
+		nl2 = nl[2]
 	)
 
-	for _, x := range l {
-		for _, y := range x {
-			switch y.value {
-			case s:
-				r.start = runNode(y)
-			case e:
-				r.end = runNode(y)
-			}
+	if nl0 > 0 {
+		pf := l[nl0-1][nl1][nl2]
+		if pf.value == fc {
+			n.addChild(runNode(pf))
+		}
+	}
+	if nl0 < len(l)-1 {
+		pb := l[nl0+1][nl1][nl2]
+		if pb.value == fc {
+			n.addChild(runNode(pb))
 		}
 	}
 }
 
-func (r *runner) lookAround(n *rNode) {
-	nl := n.location
-	for _, v := range r.openNodes {
-		var (
-			vl = v.location
-		)
-		if vl[0]-1 == nl[0] && vl[1] == nl[1] {
-			n.addChild(v)
-		} else if vl[0]+1 == nl[0] && vl[1] == nl[1] {
-			n.addChild(v)
-		} else if vl[1]-1 == nl[1] && vl[0] == nl[0] {
-			n.addChild(v)
-		} else if vl[1]+1 == nl[1] && vl[0] == nl[0] {
-			n.addChild(v)
+func (r *runner) checkSpace(n *rNode) {
+	var (
+		m   = r.maze
+		oc  = m.openChar
+		fc  = m.floorChar
+		sc  = m.startChar
+		ec  = m.endChar
+		nl  = n.location
+		nl0 = nl[0]
+		nl1 = nl[1]
+		nl2 = nl[2]
+		cf  = m.layout[nl0]
+		f1  = cf[nl1-1][nl2]
+		f2  = cf[nl1+1][nl2]
+		f3  = cf[nl1][nl2-1]
+		f4  = cf[nl1][nl2+1]
+	)
+
+	for _, x := range []node{f1, f2, f3, f4} {
+		switch x.value {
+		case oc, fc, sc, ec:
+			n.addChild(runNode(x))
 		}
 	}
 }
@@ -85,11 +118,10 @@ func (r *runner) makeNodePaths() {
 			cp      = current.path
 			cl      = current.location
 		)
-
 		rtv = rtv[1:]
 		if !slices.Contains(vtd, cl) {
-			r.lookAround(&current)
 
+			r.lookAround(&current)
 			newPath := make(path, len(cp))
 			for k, v := range cp {
 				newPath[k] = v
@@ -113,15 +145,14 @@ func (r *runner) makeNodePaths() {
 
 func (r *runner) buildPath() {
 	var (
-		start = r.start.location
-		end   = r.end.location
-		mpd   = r.mappedLayout
-		m     = r.maze
-		p     = r.pathChar
-		s     = m.startChar
-		e     = m.endChar
-		w     = m.wallChar
-		o     = m.openChar
+		mpd = r.mappedLayout
+		m   = r.maze
+		p   = r.pathChar
+		s   = m.startChar
+		e   = m.endChar
+		w   = m.wallChar
+		o   = m.openChar
+		f   = m.floorChar
 	)
 	for slices.Contains([]rune{s, e, w, o}, p) {
 		fmt.Println("The current path character can not be the same as the maze characters.")
@@ -133,11 +164,13 @@ func (r *runner) buildPath() {
 	mpd.traverse(func(n node) {
 		var (
 			l  = n.location
+			v  = n.value
 			l0 = l[0]
 			l1 = l[1]
+			l2 = l[2]
 		)
-		if start != l && end != l && slices.Contains(r.shortestPath.toSlice(), l) {
-			mpd[l0][l1].value = p
+		if !slices.Contains([]rune{s, e, f}, v) && slices.Contains(r.shortestPath.toSlice(), l) {
+			mpd[l0][l1][l2].value = p
 		}
 	})
 }
@@ -164,9 +197,7 @@ func Runner(m maze, pathChar rune) runner {
 		pathChar:     pathChar,
 		shortestPath: make(path),
 	}
-
-	r.getOpenNodes()
-	r.findEndPoints()
+	r.findEndpoints()
 	r.makeNodePaths()
 	r.buildPath()
 	return r
