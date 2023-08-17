@@ -40,9 +40,9 @@ func (l layout) deepCopy() layout {
 	nl := make(layout, len(l))
 	for i, f := range l {
 		nl[i] = make(floor, len(f))
-		for j := range f {
-			nl[i][j] = make([]node, len(l[i]))
-			copy(nl[i], l[i])
+		for j, c := range f {
+			nl[i][j] = make([]node, len(c))
+			copy(nl[i][j], l[i][j])
 		}
 	}
 	return nl

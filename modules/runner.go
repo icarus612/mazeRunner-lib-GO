@@ -46,7 +46,7 @@ func (r *runner) lookAround(n *rNode) {
 	)
 
 	switch n.value {
-	case oc, fc, sc:
+	case oc, sc, fc:
 		r.checkSpace(n)
 		fallthrough
 	case fc:
@@ -145,15 +145,14 @@ func (r *runner) makeNodePaths() {
 
 func (r *runner) buildPath() {
 	var (
-		start = r.start.location
-		end   = r.end.location
-		mpd   = r.mappedLayout
-		m     = r.maze
-		p     = r.pathChar
-		s     = m.startChar
-		e     = m.endChar
-		w     = m.wallChar
-		o     = m.openChar
+		mpd = r.mappedLayout
+		m   = r.maze
+		p   = r.pathChar
+		s   = m.startChar
+		e   = m.endChar
+		w   = m.wallChar
+		o   = m.openChar
+		f   = m.floorChar
 	)
 	for slices.Contains([]rune{s, e, w, o}, p) {
 		fmt.Println("The current path character can not be the same as the maze characters.")
@@ -165,11 +164,12 @@ func (r *runner) buildPath() {
 	mpd.traverse(func(n node) {
 		var (
 			l  = n.location
+			v  = n.value
 			l0 = l[0]
 			l1 = l[1]
 			l2 = l[2]
 		)
-		if start != l && end != l && slices.Contains(r.shortestPath.toSlice(), l) {
+		if !slices.Contains([]rune{s, e, f}, v) && slices.Contains(r.shortestPath.toSlice(), l) {
 			mpd[l0][l1][l2].value = p
 		}
 	})

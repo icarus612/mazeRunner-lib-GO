@@ -23,11 +23,11 @@ func main() {
 		Runner   = modules.Runner
 	)
 	fmt.Println("What is the L x W x H size you would like for the maze?")
-	fmt.Println("Default values are 10 x 10 x 1 (press enter)?")
+	fmt.Println("Default values are 40 x 20 x 3 (press enter)?")
 
-	size[0] = getSize("L: ", size[0], 10)
-	size[1] = getSize("W: ", size[1], 10)
-	size[2] = getSize("H: ", size[2], 1)
+	size[0] = getSize("L: ", size[0], 40)
+	size[1] = getSize("W: ", size[1], 20)
+	size[2] = getSize("H: ", size[2], 3)
 	fmt.Print("Maze type  ? ")
 	fmt.Scanln(&mazeType)
 	if len(mazeType) == 0 {
