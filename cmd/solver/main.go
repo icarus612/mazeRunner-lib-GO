@@ -1,9 +1,9 @@
-package solver
+package main
 
 import (
 	"fmt"
 
-	mazerunner "github.com/icarus612/mazerunner"
+	mazerunner "github.com/icarus612/mazeRunner-lib-GO"
 )
 
 func getSize(str string, val int, size int) int {
