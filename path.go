@@ -1,4 +1,4 @@
-package modules
+package main
 
 type path map[point]bool
 

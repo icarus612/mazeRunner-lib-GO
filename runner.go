@@ -1,9 +1,8 @@
-package modules
+package main
 
 import (
 	"fmt"
-
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 type runner struct {

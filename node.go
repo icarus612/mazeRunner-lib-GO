@@ -1,4 +1,4 @@
-package modules
+package main
 
 type node struct {
 	value    rune
