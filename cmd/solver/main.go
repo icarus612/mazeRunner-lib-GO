@@ -18,6 +18,8 @@ func main() {
 		size     [3]int
 		mazeType string
 		pathType string
+		Maze     = Maze
+		Runner   = Runner
 	)
 	fmt.Println("What is the L x W x H size you would like for the maze?")
 	fmt.Println("Default values are 40 x 20 x 3 (press enter)?")
