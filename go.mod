@@ -1,3 +1,3 @@
 module github.com/icarus612/mazeRunner-lib-GO
 
-go 1.18
+go 1.21
