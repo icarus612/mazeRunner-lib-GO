@@ -1,4 +1,4 @@
-package mazerunner
+package lib
 
 type node struct {
 	value    rune

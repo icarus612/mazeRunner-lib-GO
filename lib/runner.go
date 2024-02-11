@@ -1,4 +1,4 @@
-package mazerunner
+package lib
 
 import (
 	"fmt"
